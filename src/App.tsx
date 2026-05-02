@@ -13,14 +13,22 @@ export default function App() {
     setLoading(true);
     setMessage(null);
 
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
       setMessage({ text: error.message, type: 'error' });
-    } else {
-      setMessage({ text: 'Account created successfully!', type: 'success' });
-      setEmail('');
-      setPassword('');
+    } else if (data.user) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({ id: data.user.id, email });
+
+      if (profileError) {
+        setMessage({ text: 'Account created but profile setup failed', type: 'error' });
+      } else {
+        setMessage({ text: 'Account created successfully!', type: 'success' });
+        setEmail('');
+        setPassword('');
+      }
     }
 
     setLoading(false);
