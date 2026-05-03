@@ -51,6 +51,7 @@ def _ydl_opts(
     audio_only: bool,
     max_height: int,
     max_filesize: int | None,
+    cookies_file: Path | None = None,
 ) -> dict[str, Any]:
     opts: dict[str, Any] = {
         "outtmpl": str(out_dir / "%(title).80s-%(id)s.%(ext)s"),
@@ -66,6 +67,8 @@ def _ydl_opts(
             audio_only=audio_only, max_height=max_height, max_filesize=max_filesize
         ),
     }
+    if cookies_file is not None:
+        opts["cookiefile"] = str(cookies_file)
     if audio_only:
         opts["postprocessors"] = [
             {
@@ -117,6 +120,7 @@ def _download_sync(
     audio_only: bool,
     max_height: int,
     max_filesize: int | None,
+    cookies_file: Path | None = None,
 ) -> DownloadResult:
     try:
         from yt_dlp import YoutubeDL  # type: ignore
@@ -131,6 +135,7 @@ def _download_sync(
         audio_only=audio_only,
         max_height=max_height,
         max_filesize=max_filesize,
+        cookies_file=cookies_file,
     )
 
     try:
@@ -172,9 +177,16 @@ async def download_media(
     audio_only: bool = False,
     max_height: int = 720,
     max_filesize_bytes: int | None = None,
+    cookies_file: Path | None = None,
 ) -> DownloadResult:
     """Run yt-dlp in a thread executor and return a DownloadResult."""
-    log.info("downloading %s (audio_only=%s, max_height=%s)", url, audio_only, max_height)
+    log.info(
+        "downloading %s (audio_only=%s, max_height=%s, cookies=%s)",
+        url,
+        audio_only,
+        max_height,
+        "yes" if cookies_file else "no",
+    )
     return await asyncio.to_thread(
         _download_sync,
         url,
@@ -182,4 +194,5 @@ async def download_media(
         audio_only=audio_only,
         max_height=max_height,
         max_filesize=max_filesize_bytes,
+        cookies_file=cookies_file,
     )
