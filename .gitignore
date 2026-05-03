@@ -1,2 +1,13 @@
 node_modules/
 .env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Bot artifacts
+bot/.env
+bot/downloads/
