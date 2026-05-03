@@ -20,6 +20,7 @@ class BotConfig:
     max_file_size_mb: int = 50
     max_video_height: int = 720
     allowed_user_ids: frozenset[int] = field(default_factory=frozenset)
+    cookies_file: Path | None = None
 
     @property
     def max_file_size_bytes(self) -> int:
@@ -76,10 +77,27 @@ def load_config() -> BotConfig:
     download_dir = Path(os.environ.get("DOWNLOAD_DIR", "bot/downloads")).expanduser().resolve()
     download_dir.mkdir(parents=True, exist_ok=True)
 
+    cookies_file = _resolve_cookies_file(os.environ.get("COOKIES_FILE"))
+
     return BotConfig(
         telegram_bot_token=token,
         download_dir=download_dir,
         max_file_size_mb=_parse_int("MAX_FILE_SIZE_MB", os.environ.get("MAX_FILE_SIZE_MB"), 50),
         max_video_height=_parse_int("MAX_VIDEO_HEIGHT", os.environ.get("MAX_VIDEO_HEIGHT"), 720),
         allowed_user_ids=_parse_user_ids(os.environ.get("ALLOWED_USER_IDS")),
+        cookies_file=cookies_file,
     )
+
+
+def _resolve_cookies_file(raw: str | None) -> Path | None:
+    """Validate the optional COOKIES_FILE env var and return an absolute path."""
+    if not raw or not raw.strip():
+        return None
+    path = Path(raw.strip()).expanduser().resolve()
+    if not path.is_file():
+        raise ConfigError(
+            f"COOKIES_FILE is set to {raw!r} but no file exists at {path}. "
+            "Export cookies with the 'Get cookies.txt LOCALLY' extension or "
+            "`yt-dlp --cookies-from-browser <browser> --cookies cookies.txt`."
+        )
+    return path

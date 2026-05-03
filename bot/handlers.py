@@ -136,6 +136,7 @@ async def _download_and_send(
                 audio_only=audio_only,
                 max_height=cfg.max_video_height,
                 max_filesize_bytes=cfg.max_file_size_bytes,
+                cookies_file=cfg.cookies_file,
             )
             await _send_media(ctx, chat.id, result)
         await status.edit_text("Done.")

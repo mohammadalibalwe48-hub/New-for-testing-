@@ -76,6 +76,53 @@ All settings come from environment variables (see `bot/.env.example`):
 | `MAX_FILE_SIZE_MB`   | `50`             | Telegram outbound cap; raise only with self-hosted Bot API. |
 | `MAX_VIDEO_HEIGHT`   | `720`            | Target video resolution.                           |
 | `ALLOWED_USER_IDS`   | _empty_          | Comma-separated whitelist; empty = open to anyone. |
+| `COOKIES_FILE`       | _empty_          | Path to a Netscape `cookies.txt`. Required for YouTube / Instagram / Reddit on cloud IPs. |
+
+## Making YouTube / Instagram work
+
+YouTube and Instagram (and increasingly Reddit) detect requests coming from
+datacenter IPs as bots and refuse to serve media unless you authenticate.
+TikTok, Twitter/X, Vimeo, Dailymotion, and most other sites do **not** need
+this.
+
+The fix is to give yt-dlp your browser cookies via the `COOKIES_FILE` env
+var.
+
+### Easiest: use a browser extension
+
+1. In Chrome or Firefox install **"Get cookies.txt LOCALLY"**
+   ([Chrome](https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc) /
+   [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/)).
+2. Log in to YouTube / Instagram / etc. in that browser.
+3. Open the site, click the extension icon, and export.
+4. Save the file as `bot/cookies.txt` (or anywhere) and set:
+
+   ```bash
+   export COOKIES_FILE=bot/cookies.txt
+   ```
+
+5. Restart the bot.
+
+### Alternative: yt-dlp's built-in extractor
+
+From a machine where the right browser is installed:
+
+```bash
+yt-dlp --cookies-from-browser firefox --cookies cookies.txt https://youtube.com
+```
+
+Then upload `cookies.txt` to the host running the bot and point
+`COOKIES_FILE` at it.
+
+### Tips
+
+- Use a **secondary Google / Instagram account** for the cookies — sessions
+  authenticated from a new IP can occasionally trigger a security flag on
+  the source account.
+- `cookies.txt` contains login secrets. **Never** commit it. The repo's
+  `.gitignore` already excludes `bot/cookies.txt`.
+- Cookies eventually expire; if downloads start failing again with auth
+  errors, re-export.
 
 ## Out of scope (for now)
 

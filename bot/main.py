@@ -45,11 +45,12 @@ def main() -> None:
 
     log.info(
         "starting bot (download_dir=%s, max_file_size=%s MB, max_height=%sp, "
-        "allowed_users=%s)",
+        "allowed_users=%s, cookies=%s)",
         cfg.download_dir,
         cfg.max_file_size_mb,
         cfg.max_video_height,
         "open" if not cfg.allowed_user_ids else len(cfg.allowed_user_ids),
+        cfg.cookies_file or "none",
     )
 
     app = build_app(cfg)

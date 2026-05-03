@@ -11,3 +11,5 @@ venv/
 # Bot artifacts
 bot/.env
 bot/downloads/
+bot/cookies.txt
+bot/cookies/
